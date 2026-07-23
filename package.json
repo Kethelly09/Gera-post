@@ -1,0 +1,6 @@
+{
+  "name": "gera-post-produto",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Gerador de posts de Telegram para produtos afiliados (Shopee/Mercado Livre)"
+}
