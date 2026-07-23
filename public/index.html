@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gera Post — Telegram</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito+Sans:wght@400;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --coral:#FF6B4A; --coral-dark:#E24E2E; --teal:#173F3E; --teal-light:#215655;
+    --yellow:#FFC93C; --cream:#FFF8F0; --ink:#241C1C; --paper:#FFFFFF; --line: rgba(36,28,28,0.12);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--cream);color:var(--ink);font-family:'Nunito Sans', sans-serif;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1100px;margin:0 auto;padding:32px 20px 80px;}
+  header.hero{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:20px;flex-wrap:wrap;}
+  .brand{display:flex;align-items:center;gap:14px;}
+  .brand-mark{width:52px;height:52px;background:var(--teal);border-radius:14px;display:flex;align-items:center;justify-content:center;transform:rotate(-4deg);box-shadow:3px 4px 0 var(--coral);flex-shrink:0;}
+  .brand-mark span{font-size:24px;}
+  h1{font-family:'Baloo 2', sans-serif;font-weight:800;font-size:clamp(28px,4vw,38px);margin:0;line-height:1.05;color:var(--teal);}
+  .brand p{margin:2px 0 0;font-size:14px;color:rgba(36,28,28,0.6);font-weight:600;}
+  .license-bar{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:12px 16px;display:flex;gap:10px;align-items:center;margin-bottom:20px;flex-wrap:wrap;}
+  .license-bar input{flex:1;min-width:180px;padding:9px 12px;border-radius:10px;border:1.5px solid var(--line);font-family:'Space Mono',monospace;font-size:13px;}
+  .license-bar button{background:var(--teal);color:white;border:none;padding:9px 16px;border-radius:10px;font-weight:700;cursor:pointer;font-size:13px;}
+  .license-status{font-size:12px;font-weight:700;}
+  .license-status.ok{color:#1a7a4a;}
+  .license-status.bad{color:#A33C24;}
+  .grid{display:grid;grid-template-columns: 1.1fr 1fr;gap:24px;align-items:start;}
+  @media (max-width: 860px){.grid{grid-template-columns:1fr;}}
+  .card{background:var(--paper);border-radius:20px;border:1px solid var(--line);padding:26px;box-shadow:0 2px 0 var(--line);}
+  .card h2{font-family:'Baloo 2', sans-serif;font-size:20px;margin:0 0 4px;color:var(--teal);}
+  .card .hint{font-size:13px;color:rgba(36,28,28,0.55);margin:0 0 20px;line-height:1.5;}
+  label{display:block;font-size:13px;font-weight:700;margin:16px 0 6px;color:var(--teal);}
+  label.first{margin-top:0;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  input[type=text], input[type=url], select, textarea{width:100%;padding:11px 13px;border-radius:12px;border:1.5px solid var(--line);font-family:'Nunito Sans', sans-serif;font-size:14.5px;background:#FFFDFB;color:var(--ink);outline:none;transition:border-color .15s;}
+  input:focus, select:focus, textarea:focus{border-color:var(--coral);}
+  .upload-box{border:2px dashed var(--line);border-radius:14px;padding:16px;text-align:center;cursor:pointer;transition:border-color .15s, background .15s;position:relative;}
+  .upload-box:hover{border-color:var(--coral); background:#FFF3EE;}
+  .upload-box input{position:absolute;inset:0;opacity:0;cursor:pointer;}
+  .upload-box .txt{font-size:13px;font-weight:700;color:var(--teal-light);}
+  .thumb-preview{margin-top:12px;max-width:140px;border-radius:10px;border:1.5px solid var(--line);display:block;}
+  .btn{margin-top:22px;width:100%;background:var(--coral);color:white;border:none;padding:14px 20px;border-radius:14px;font-family:'Baloo 2', sans-serif;font-weight:700;font-size:16px;cursor:pointer;box-shadow:0 3px 0 var(--coral-dark);transition:transform .08s;}
+  .btn:active{transform:translateY(2px); box-shadow:0 1px 0 var(--coral-dark);}
+  .btn:disabled{background:#d9c9c2; box-shadow:none; cursor:not-allowed;}
+  .error-msg{background:#FFECE8;border:1px solid #FFB3A0;color:#A33C24;padding:10px 14px;border-radius:10px;font-size:13px;margin-top:14px;font-weight:700;}
+  .preview-card{background:var(--teal);border-radius:20px;padding:20px;position:sticky;top:20px;}
+  .preview-card h2{color:var(--yellow); margin-bottom:2px;}
+  .preview-card .hint{color:rgba(255,255,255,0.6); margin-bottom:18px;}
+  .empty-state{background:rgba(255,255,255,0.06);border:1.5px dashed rgba(255,255,255,0.25);border-radius:16px;padding:40px 20px;text-align:center;color:rgba(255,255,255,0.55);font-size:14px;}
+  .tg-bubble{background:#FFFDFB;border-radius:16px;padding:16px 16px 14px;position:relative;}
+  .price-tag{position:absolute;top:-14px;right:18px;background:var(--yellow);color:var(--ink);font-family:'Space Mono', monospace;font-weight:700;font-size:13px;padding:6px 14px 6px 10px;border-radius:6px 6px 6px 2px;transform:rotate(4deg);box-shadow:2px 2px 0 rgba(36,28,28,0.15);}
+  .price-tag::before{content:'';position:absolute;left:-4px; top:50%;width:8px;height:8px;background:var(--cream);border:2px solid var(--ink);border-radius:50%;transform:translateY(-50%);}
+  .tg-title{font-family:'Baloo 2', sans-serif;font-weight:700;font-size:18px;color:var(--teal);margin:6px 0 8px;}
+  .tg-thumb{width:100%;max-height:220px;object-fit:cover;border-radius:10px;margin-bottom:12px;}
+  .tg-body{font-size:14px;line-height:1.6;white-space:pre-wrap;color:var(--ink);}
+  .tg-meta{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:11px;color:rgba(36,28,28,0.4);}
+  .copy-row{display:flex;gap:10px;margin-top:16px;}
+  .copy-btn{flex:1;background:rgba(255,255,255,0.1);color:white;border:1px solid rgba(255,255,255,0.25);padding:10px;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;font-family:'Nunito Sans', sans-serif;}
+  .copy-btn:hover{background:rgba(255,255,255,0.18);}
+  .copy-btn.ok{background:var(--yellow); color:var(--ink); border-color:var(--yellow);}
+  .history{margin-top:26px;}
+  .history h2{font-family:'Baloo 2', sans-serif;color:var(--teal);font-size:18px;margin-bottom:12px;}
+  .hist-item{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:12px;}
+  .hist-item .name{font-weight:700; font-size:14px; color:var(--teal);}
+  .hist-item .date{font-size:11px; color:rgba(36,28,28,0.45); font-family:'Space Mono', monospace;}
+  .hist-item button{background:none;border:1px solid var(--line);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;color:var(--teal);}
+  .hist-item button:hover{border-color:var(--coral); color:var(--coral);}
+  .loading-dots span{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--yellow);margin:0 2px;animation:bounce 1s infinite;}
+  .loading-dots span:nth-child(2){animation-delay:.15s;}
+  .loading-dots span:nth-child(3){animation-delay:.3s;}
+  @keyframes bounce{0%,80%,100%{transform:translateY(0);}40%{transform:translateY(-5px);}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="brand">
+      <div class="brand-mark"><span>🏷️</span></div>
+      <div><h1>Gera Post</h1><p>Título, descrição e legenda prontos pro seu Telegram</p></div>
+    </div>
+  </header>
+
+  <div class="license-bar">
+    <input type="text" id="licenseInput" placeholder="Sua chave de licença (ex: GABI-A1B2)">
+    <button id="saveLicenseBtn">Salvar</button>
+    <span id="licenseStatus" class="license-status"></span>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>Novo produto</h2>
+      <p class="hint">Preencha o que tiver — nome do produto ou uma foto já bastam. Link e preço deixam a legenda mais completa.</p>
+      <label class="first">Categoria</label>
+      <select id="categoria">
+        <option value="Moda">Moda</option>
+        <option value="Calçados">Calçados</option>
+        <option value="Beleza">Beleza</option>
+        <option value="Outro">Outro</option>
+      </select>
+      <label>Nome do produto</label>
+      <input type="text" id="nome" placeholder="Ex: Kit gel nail polish 6 cores">
+      <div class="row2">
+        <div><label>Preço</label><input type="text" id="preco" placeholder="Ex: R$ 39,90"></div>
+        <div><label>Link de afiliado</label><input type="url" id="link" placeholder="Cole aqui o link"></div>
+      </div>
+      <label>Foto do produto (opcional)</label>
+      <div class="upload-box" id="uploadBox">
+        <input type="file" id="fotoInput" accept="image/*">
+        <div class="txt" id="uploadTxt">📷 Toque para subir uma foto</div>
+      </div>
+      <img id="thumbPreview" class="thumb-preview" style="display:none;">
+      <button class="btn" id="gerarBtn">✨ Gerar post</button>
+      <div id="errorBox"></div>
+    </div>
+
+    <div class="preview-card">
+      <h2>Prévia</h2>
+      <p class="hint">É assim que vai ficar pronto pra colar no Telegram</p>
+      <div id="previewArea"><div class="empty-state">Seu post aparece aqui assim que você gerar 🏷️</div></div>
+    </div>
+  </div>
+
+  <div class="history" id="historySection" style="display:none;">
+    <h2>Histórico</h2>
+    <div id="historyList"></div>
+  </div>
+</div>
+
+<script>
+const fotoInput = document.getElementById('fotoInput');
+const thumbPreview = document.getElementById('thumbPreview');
+const uploadTxt = document.getElementById('uploadTxt');
+const gerarBtn = document.getElementById('gerarBtn');
+const errorBox = document.getElementById('errorBox');
+const previewArea = document.getElementById('previewArea');
+const historySection = document.getElementById('historySection');
+const historyList = document.getElementById('historyList');
+const licenseInput = document.getElementById('licenseInput');
+const licenseStatus = document.getElementById('licenseStatus');
+
+let uploadedImageBase64 = null;
+let uploadedImageMediaType = null;
+
+const savedLicense = localStorage.getItem('gerapost_license');
+if (savedLicense) {
+  licenseInput.value = savedLicense;
+  licenseStatus.textContent = '💾 salva';
+  licenseStatus.className = 'license-status ok';
+}
+document.getElementById('saveLicenseBtn').addEventListener('click', () => {
+  localStorage.setItem('gerapost_license', licenseInput.value.trim());
+  licenseStatus.textContent = '💾 salva';
+  licenseStatus.className = 'license-status ok';
+});
+
+fotoInput.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  uploadedImageMediaType = file.type;
+  const reader = new FileReader();
+  reader.onload = () => {
+    uploadedImageBase64 = reader.result.split(',')[1];
+    thumbPreview.src = reader.result;
+    thumbPreview.style.display = 'block';
+    uploadTxt.textContent = '✅ Foto carregada — toque para trocar';
+  };
+  reader.readAsDataURL(file);
+});
+
+function showError(msg){ errorBox.innerHTML = `<div class="error-msg">${msg}</div>`; }
+function clearError(){ errorBox.innerHTML = ''; }
+function setLoading(isLoading){
+  gerarBtn.disabled = isLoading;
+  gerarBtn.innerHTML = isLoading ? 'Gerando <span class="loading-dots"><span></span><span></span><span></span></span>' : '✨ Gerar post';
+}
+
+async function gerarPost(){
+  clearError();
+  const nome = document.getElementById('nome').value.trim();
+  const preco = document.getElementById('preco').value.trim();
+  const link = document.getElementById('link').value.trim();
+  const categoria = document.getElementById('categoria').value;
+  const licenseKey = licenseInput.value.trim();
+
+  if(!licenseKey){ showError('Informe sua chave de licença antes de gerar.'); return; }
+  if(!nome && !uploadedImageBase64){ showError('Preencha o nome do produto ou suba uma foto.'); return; }
+
+  setLoading(true);
+  try{
+    const response = await fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        licenseKey, categoria, nome, preco, link,
+        imageBase64: uploadedImageBase64,
+        imageMediaType: uploadedImageMediaType
+      })
+    });
+    const parsed = await response.json();
+    if(!response.ok){
+      showError(parsed.error || 'Não foi possível gerar o post.');
+      return;
+    }
+    renderPreview(parsed, thumbPreview.style.display === 'block' ? thumbPreview.src : null, preco);
+    saveToHistory(parsed, nome || 'Produto sem nome');
+  }catch(err){
+    console.error(err);
+    showError('Erro de conexão. Tenta de novo em instantes.');
+  }finally{
+    setLoading(false);
+  }
+}
+
+function renderPreview(parsed, imgSrc, preco){
+  previewArea.innerHTML = `
+    <div class="tg-bubble">
+      ${preco ? `<div class="price-tag">${escapeHtml(preco)}</div>` : ''}
+      ${imgSrc ? `<img class="tg-thumb" src="${imgSrc}">` : ''}
+      <div class="tg-title">${escapeHtml(parsed.titulo || '')}</div>
+      <div class="tg-body">${escapeHtml(parsed.legenda_telegram || '')}</div>
+      <div class="tg-meta"><span>Pronto pra colar</span><span>📨 Telegram</span></div>
+    </div>
+    <div class="copy-row">
+      <button class="copy-btn" onclick="copyText(this, this.dataset.txt)" data-txt="${escapeAttr(parsed.legenda_telegram || '')}">📋 Copiar legenda</button>
+      <button class="copy-btn" onclick="copyText(this, this.dataset.txt)" data-txt="${escapeAttr((parsed.hashtags||[]).map(h=>'#'+h).join(' '))}">🏷️ Copiar hashtags</button>
+    </div>
+  `;
+}
+function escapeHtml(str){ const div = document.createElement('div'); div.textContent = str; return div.innerHTML; }
+function escapeAttr(str){ return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;'); }
+
+window.copyText = function(btn, text){
+  navigator.clipboard.writeText(text).then(()=>{
+    const original = btn.textContent;
+    btn.textContent = '✅ Copiado!'; btn.classList.add('ok');
+    setTimeout(()=>{ btn.textContent = original; btn.classList.remove('ok'); }, 1800);
+  });
+};
+
+function saveToHistory(parsed, label){
+  const list = JSON.parse(localStorage.getItem('gerapost_history') || '[]');
+  list.unshift({ label, parsed, date: new Date().toLocaleString('pt-BR') });
+  localStorage.setItem('gerapost_history', JSON.stringify(list.slice(0, 20)));
+  loadHistory();
+}
+function loadHistory(){
+  const list = JSON.parse(localStorage.getItem('gerapost_history') || '[]');
+  historySection.style.display = list.length ? 'block' : 'none';
+  historyList.innerHTML = list.map((it, idx) => `
+    <div class="hist-item">
+      <div><div class="name">${escapeHtml(it.label)}</div><div class="date">${escapeHtml(it.date)}</div></div>
+      <button onclick="reloadFromHistory(${idx})">Ver de novo</button>
+    </div>
+  `).join('');
+}
+window.reloadFromHistory = function(idx){
+  const list = JSON.parse(localStorage.getItem('gerapost_history') || '[]');
+  const it = list[idx];
+  if(!it) return;
+  renderPreview(it.parsed, null, '');
+  window.scrollTo({top: previewArea.offsetTop - 40, behavior:'smooth'});
+};
+
+gerarBtn.addEventListener('click', gerarPost);
+loadHistory();
+</script>
+</body>
+      </html>
